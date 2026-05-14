@@ -1,4 +1,8 @@
 import time
+from dotenv import find_dotenv, load_dotenv
+import os
+
+load_dotenv(find_dotenv())
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,6 +11,8 @@ from selenium.webdriver.support import expected_conditions as Ec
 
 driver = webdriver.Chrome()
 wait = WebDriverWait(driver, 10)
+
+credents = (os.getenv("LOGIN"), os.getenv("PASSWORD"))
 
 
 def click_button(xpath: str):

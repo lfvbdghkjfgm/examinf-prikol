@@ -2,6 +2,9 @@ import requests
 from tqdm import tqdm
 import os
 import re
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv())
 
 base = "https://examinf.ru/"
 
@@ -98,4 +101,4 @@ def send_to_examinf(tasks_folder_path: str, login: str, password: str):
                 )
 
 
-send_to_examinf("../examinf/tasks", "lfvbdghkjfgm", "15761576")
+send_to_examinf("../examinf/tasks", os.getenv("LOGIN"), os.getenv("PASSWORD"))
