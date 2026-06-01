@@ -65,7 +65,9 @@ def save_from_examinf(tasks_folder_path: str, login: str, password: str):
                         ex = "c"
                     else:
                         ex = "py"
-                    with open(f"{tasks_folder_path}/{num}/{task}.{ex}", "w") as f:
+                    with open(
+                        f"{tasks_folder_path}/{num}/{task}.{ex}", "w", encoding="utf-8"
+                    ) as f:
                         text = (
                             bytes(text, encoding="utf-8").replace(
                                 b"\xc2\xa0 \xc2\xa0 ", b"    "
