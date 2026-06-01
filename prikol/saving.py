@@ -27,7 +27,6 @@ def create_session(login: str, password: str):
     check = r.get("error", 0)
     if check:
         return
-    s.cookies.update({"token": r["result"]["token"]})
     return s
 
 
@@ -39,7 +38,7 @@ def save_from_examinf(tasks_folder_path: str, login: str, password: str):
     s = create_session(login, password)
     if not s:
         exit()
-    for num in range(1, 27):
+    for num in range(1, 28):
         if num in [20, 21]:
             continue
         tasks = get_tasks(num)
@@ -60,7 +59,13 @@ def save_from_examinf(tasks_folder_path: str, login: str, password: str):
                         text = text[10:-3].strip()
                     else:
                         text = text[3:-3].strip()
-                    with open(f"{tasks_folder_path}/{num}/{task}.py", "w") as f:
+                    if num == 6 and "вперед" in solve_string:
+                        ex = "kum"
+                    elif "/*" in text and "*/" in text:
+                        ex = "c"
+                    else:
+                        ex = "py"
+                    with open(f"{tasks_folder_path}/{num}/{task}.{ex}", "w") as f:
                         text = (
                             bytes(text, encoding="utf-8").replace(
                                 b"\xc2\xa0 \xc2\xa0 ", b"    "
@@ -72,6 +77,49 @@ def save_from_examinf(tasks_folder_path: str, login: str, password: str):
                                 + text
                             )
                         f.write(text)
+                else:
+                    js = s.get(base + f"api/task/{task}/publicSolutions/").json()
+                    result = js.get("result", 0)
+                    if not result:
+                        continue
+                    solve_string = ""
+                    for data in result:
+                        id, name = data["id"], data["studentDisplayName"]
+                        solve = post_requests(
+                            f"api/task/{task}/publicSolution/{id}/view/", s
+                        )
+                        result = solve.get("result", 0)
+                        if not result:
+                            continue
+                        solution = result.get("solution", 0)
+                        if not solution:
+                            continue
+                        resources = solution.get("resources", 0)
+                        if not resources:
+                            continue
+                        text = resources[0].get("text", 0)
+                        if not text:
+                            continue
+                        text = text.strip("`")
+                        if text.startswith("python"):
+                            text = text[6:]
+                            text = text.strip()
+                        solve_string += f"# Solved by {name}\n\n{text}\n\n"
+                    if not solve_string:
+                        continue
+                    if num == 6 and "вперед" in solve_string:
+                        ex = "kum"
+                    else:
+                        ex = "py"
+                    with open(
+                        f"{tasks_folder_path}/{num}/{task}.{ex}", "w", encoding="utf-8"
+                    ) as f:
+                        solve_string = (
+                            bytes(solve_string, encoding="utf-8").replace(
+                                b"\xc2\xa0 \xc2\xa0 ", b"    "
+                            )
+                        ).decode()
+                        f.write(solve_string)
 
 
 def send_to_examinf(tasks_folder_path: str, login: str, password: str):
@@ -101,4 +149,4 @@ def send_to_examinf(tasks_folder_path: str, login: str, password: str):
                 )
 
 
-send_to_examinf("../examinf/tasks", os.getenv("LOGIN"), os.getenv("PASSWORD"))
+save_from_examinf("../examinf/tasks", os.getenv("LOGIN"), os.getenv("PASSWORD"))
