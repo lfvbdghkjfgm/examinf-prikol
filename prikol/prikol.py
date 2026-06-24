@@ -79,8 +79,10 @@ def create_session(login: str, password: str):
     check = r.get("error", 0)
     if check:
         return
-    s.cookies.update({"token": r["result"]["token"]})
     return s
+
+
+# Возвращает номера всех заданий данного типа
 
 
 def get_tasks(task_type: int):
